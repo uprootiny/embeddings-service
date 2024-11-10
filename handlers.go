@@ -22,17 +22,26 @@ type Repo struct {
     LastModTime string   `json:"lastModified"`
 }
 
-// MapIntentHandler handles requests to map user intents to project invocations
+// MapIntentHandler maps user intents to the most relevant project using embeddings
 func MapIntentHandler(w http.ResponseWriter, r *http.Request) {
     log.Println("Handling request to map user intent")
-    // Placeholder logic for mapping intents; replace with embeddings integration
-    intents := []map[string]string{
-        {"intent": "Scrape Financial News", "project": "news_scraper", "params": "news_params.json"},
-        {"intent": "Run Sentiment Analysis", "project": "sentiment_analyzer", "params": "sentiment_params.json"},
+
+    intent := r.URL.Query().Get("intent")
+    if intent == "" {
+        http.Error(w, "Missing 'intent' parameter", http.StatusBadRequest)
+        return
     }
 
+    intentVector := convertIntentToVector(intent)
+    if intentVector == nil {
+        http.Error(w, "Failed to generate intent vector", http.StatusInternalServerError)
+        return
+    }
+
+    bestMatch := MapIntentToProject(intent, intentVector)
+
     w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(intents)
+    json.NewEncoder(w).Encode(bestMatch)
 }
 
 // ListReposHandler handles the request for listing recent repositories
