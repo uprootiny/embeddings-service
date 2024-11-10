@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Operational Dashboard</title>
+    <style>
+        /* Include your styles here */
+    </style>
+</head>
+<body>
+    <!-- System Information Section -->
+    <h2>System Overview</h2>
+    <p><strong>Hostname:</strong> {{.SystemInfo.Hostname}}</p>
+    <p><strong>OS:</strong> {{.SystemInfo.OS}}</p>
+    <p><strong>Uptime:</strong> {{.SystemInfo.Uptime}}</p>
+    <p><strong>Kernel:</strong> {{.SystemInfo.Kernel}}</p>
+    <p><strong>Architecture:</strong> {{.SystemInfo.Architecture}}</p>
+
+    <!-- Active Services Section -->
+    <h2>Active Services</h2>
+    <ul>
+        {{range .Services}}
+        <li>
+            <strong>{{.Name}} (port {{.Port}}):</strong>
+            {{if eq .Status "Running"}}
+                <span style="color: green;">Running</span>
+            {{else}}
+                <span style="color: red;">Not Running</span>
+            {{end}}
+            <a href="/logs/{{.LogFile}}">View Logs</a>
+        </li>
+        {{end}}
+    </ul>
+
+    <!-- Recently Worked On Projects Section -->
+    <h2>Recently Worked On Projects</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Project</th>
+                <th>Last Modified</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Projects}}
+            <tr>
+                <td>{{.Name}}</td>
+                <td>{{.LastModified}}</td>
+                <td><a href="/projects/{{.Name}}">Details</a></td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+
+    <!-- Scraper Management Section -->
+    <h2>Scraper Management</h2>
+    <p>Overview of scrapers and their current status:</p>
+    <ul>
+        {{range .Scrapers}}
+        <li>
+            <strong>{{.Name}}:</strong>
+            {{if eq .Status "Running"}}
+                <span style="color: green;">Running</span>
+            {{else if eq .Status "Idle"}}
+                <span style="color: orange;">Idle</span>
+            {{else}}
+                <span style="color: red;">Not Running</span>
+            {{end}}
+            <a href="{{.ConfigURL}}">Edit Config</a>
+            {{if .LogFile}}
+                | <a href="/logs/{{.LogFile}}">View Logs</a>
+            {{end}}
+        </li>
+        {{end}}
+    </ul>
+
+    <!-- Embeddings and Intent Mapping Section -->
+    <h2>Embeddings and Intent Mapping</h2>
+    <p>Explore intents and the projects/tasks that fulfill them:</p>
+    <ul>
+        {{range .Embeddings}}
+        <li>
+            <strong>Intent:</strong> {{.Intent}}
+            <ul>
+                <li><strong>Matched Project:</strong> <a href="/projects/{{.MatchedProject}}">{{.MatchedProject}}</a></li>
+                <li><strong>Params:</strong> <a href="/params/{{.Params}}">{{.Params}}</a></li>
+            </ul>
+        </li>
+        {{end}}
+    </ul>
+
+    <!-- Recommended Actions Section -->
+    <h2>Recommended Actions</h2>
+    <ul>
+        <li>Review <a href="/logs/errors.log">error logs</a> for failed services.</li>
+        <li>Start <strong>Ollama Server</strong> on port 11435: 
+            <code>./ollama --start</code>
+        </li>
+        <li>Ensure <strong>Electric App</strong> dependencies are up to date: 
+            <code>clojure -T:deps refresh</code>
+        </li>
+        <li>Schedule <strong>Daily News Scraper Run</strong>: 
+            <code>./scheduler --task news_scraper --daily</code>
+        </li>
+    </ul>
+</body>
+</html>
