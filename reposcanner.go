@@ -3,18 +3,30 @@ package main
 import (
     "os"
     "path/filepath"
+    "log"
     "strings"
 )
 
-// Repo holds information about a project repository
-type Repo struct {
-    Name         string   `json:"name"`
-    Path         string   `json:"path"`
-    EntryPoints  []string `json:"entryPoints"`
-    Intents      []string `json:"intents"`
-}
-
-// ListRecentRepos lists recently modified project directories
-func ListRecentRepos() []Repo {
+// ScanDirectories scans the given paths for project directories
+func ScanDirectories(basePaths []string) []Repo {
     var repos []Repo
-    projectPaths := []string{"/home
+    for _, basePath := range basePaths {
+        err := filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
+            if err != nil {
+                log.Printf("Error accessing path %s: %v", path, err)
+                return nil
+            }
+            if info.IsDir() && path != basePath && !strings.HasPrefix(info.Name(), ".") {
+                repos = append(repos, Repo{
+                    Name: info.Name(),
+                    Path: path,
+                })
+            }
+            return nil
+        })
+        if err != nil {
+            log.Printf("Error walking the path %s: %v", basePath, err)
+        }
+    }
+    return repos
+}
