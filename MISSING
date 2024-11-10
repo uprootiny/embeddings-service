@@ -1,0 +1,36 @@
+# Missing Features and Dependencies
+
+## Scraper Access and Integration
+- **Proper Scraper Access**:
+  - Ensure all scrapers are configured with appropriate credentials and API keys.
+  - Verify and document third-party API rate limits and data handling policies.
+
+## Prompt Set Generation
+- **Dynamic Prompt Creation**:
+  - Automate the creation of LLM prompts tailored for various analysis tasks.
+  - Include mechanisms to manage prompt sets and ensure they are contextually accurate.
+
+## Integration of Subprojects
+- **Data Ingestion Pipelines**:
+  - Integrate subprojects responsible for ingesting and processing raw data.
+  - Establish standardized formats for communication between the dashboard and subprojects.
+
+- **NLP and Embedding Tools**:
+  - Connect existing NLP processing scripts with the dashboard for seamless embeddings generation.
+  - Enable real-time interaction with subprojects for data enrichment.
+
+## Dashboard Enhancements
+- **Loading States**:
+  - Implement refined loading indicators for sections dependent on asynchronous data.
+- **Error Handling**:
+  - Develop more comprehensive error feedback for LLM interactions.
+- **Interactive Visuals**:
+  - Introduce graphs, charts, and other visual elements to make data insights clearer.
+
+## Dependencies
+- **Service Discovery**:
+  - Ensure that all running services are detected and displayed dynamically.
+- **Ollama Integration**:
+  - Review and refine how Ollama LLM interacts with the dashboard for consistent response handling.
+- **User Authentication**:
+  - Add an authentication mechanism to restrict access based on user roles.
