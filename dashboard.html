@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><title>Financial Intelligence Dashboard</title><link href="manifest.json" rel="manifest"><script>if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(function(registration) {
+            console.log('Service Worker registered with scope:', registration.scope);
+          }).catch(function(error) {
+            console.log('Service Worker registration failed:', error);
+          });
+      }</script></head><body><header><h1>Financial Intelligence Dashboard</h1></header><nav><button onclick="showSection(&apos;overview&apos;)">Overview</button><button onclick="showSection(&apos;projects&apos;)">Projects</button><button onclick="showSection(&apos;scrapers&apos;)">Scrapers</button><button onclick="showSection(&apos;analysis&apos;)">Analysis</button><button onclick="showSection(&apos;embeddings&apos;)">Embeddings</button><button onclick="showSection(&apos;console&apos;)">Console</button></nav><main><section class="section active" id="overview"><h2>System Overview</h2><div class="card"><h3>System Information</h3><p><strong>Hostname: </strong>m4520.contaboserver.net</p><p><strong>OS: </strong>Ubuntu 22.04.5 LTS</p><p><strong>Uptime: </strong>up 1 week, 4 days, 10 hours, 35 minutes</p><p><strong>Kernel: </strong>5.15.0-121-generic</p><p><strong>Architecture: </strong>x86_64</p></div><div class="card"><h3>Active Network Services</h3><p>code-65ed 127.0.0.1:38991</p><p>controlle *:8080</p><p>java 127.0.0.1:38663</p><p>main *:5000</p><p>postgres 127.0.0.1:5432</p><p>sshd *:22</p><p>systemd-r 127.0.0.53:53</p></div></section><section class="section" id="projects"><h2>Projects</h2><div class="card"><h3>Recently Modified Projects</h3><table><thead><tr><th>Project</th><th>Last Modified</th><th>Actions</th></tr></thead><tbody><tr><td>diagnostics</td><td>2024-11-10 13:28:39.7151469510</td><td><button class="primary" onclick="viewProject(&apos;diagnostics&apos;)">Details</button></td></tr><tr><td>electric-starter-app</td><td>2024-11-08 14:48:04.2934632990</td><td><button class="primary" onclick="viewProject(&apos;electric-starter-app&apos;)">Details</button></td></tr><tr><td>ClojureProjects</td><td>2024-11-07 17:56:09.7109969200</td><td><button class="primary" onclick="viewProject(&apos;ClojureProjects&apos;)">Details</button></td></tr><tr><td>interactive-webpage</td><td>2024-09-19 04:18:16.4601584260</td><td><button class="primary" onclick="viewProject(&apos;interactive-webpage&apos;)">Details</button></td></tr><tr><td>my-project</td><td>2024-09-18 05:31:09.2040571640</td><td><button class="primary" onclick="viewProject(&apos;my-project&apos;)">Details</button></td></tr></tbody></table></div></section><section class="section" id="scrapers"><h2>Scraper Management</h2><div class="card"><h3>Active Scrapers</h3><ul><li><strong>News Scraper</strong> - <span class="highlight">Running</span><div class="actions"><button onclick="viewLogs(&apos;news-scraper&apos;)">View Logs</button><button onclick="editConfig(&apos;news-scraper&apos;)">Edit Config</button><button onclick="controlScraper(&apos;news-scraper&apos;, &apos;stop&apos;)">Stop</button></div></li><li><strong>Stock Scraper</strong> - <span class="">Idle</span><div class="actions"><button onclick="viewLogs(&apos;stock-scraper&apos;)">View Logs</button><button onclick="editConfig(&apos;stock-scraper&apos;)">Edit Config</button><button onclick="controlScraper(&apos;stock-scraper&apos;, &apos;start&apos;)">Start</button></div></li><li><strong>Event Correlation Scraper</strong> - <span class="">Stopped</span><div class="actions"><button onclick="viewLogs(&apos;event-correlation-scraper&apos;)">View Logs</button><button onclick="editConfig(&apos;event-correlation-scraper&apos;)">Edit Config</button><button onclick="controlScraper(&apos;event-correlation-scraper&apos;, &apos;start&apos;)">Start</button></div></li></ul></div></section><section class="section" id="analysis"><h2>Data Analysis</h2><div class="card"><h3>Available Analyses</h3><ul><li><strong>Sentiment Analysis</strong><div class="actions"><button onclick="runAnalysis(&apos;sentiment-analysis&apos;)">Run Analysis</button></div></li><li><strong>Stock Price Correlation</strong><div class="actions"><button onclick="runAnalysis(&apos;stock-price-correlation&apos;)">Run Analysis</button></div></li><li><strong>Market Trend Forecast</strong><div class="actions"><button onclick="runAnalysis(&apos;market-trend-forecast&apos;)">Run Analysis</button></div></li></ul></div></section><section class="section" id="embeddings"><h2>Embeddings Service</h2><div class="card"><h3>Intent Mapping</h3><p>Enter your intent, and we'll map it to the appropriate projects and tasks.</p><input id="user-intent" placeholder="e.g., Analyze the impact of recent tech news on stock prices" type="text"><div class="actions"><button class="primary" onclick="mapIntent()">Map Intent</button></div><div id="intent-results"></div></div></section><section class="section" id="console"><h2>Console</h2><div id="console"></div><input id="console-input" onkeydown="if(event.key === &apos;Enter&apos;) executeCommand()" placeholder="Enter command..." type="text"></section></main><footer><p>&copy; 2024 Financial Intelligence Dashboard</p></footer><script>function showSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+          section.classList.remove('active');
+          if (section.id === sectionId) {
+            section.classList.add('active');
+          }
+        });
+      }
+
+      function viewProject(projectName) {
+        alert('Viewing details for project: ' + projectName);
+      }
+
+      function viewLogs(scraperName) {
+        alert('Viewing logs for: ' + scraperName);
+      }
+
+      function editConfig(scraperName) {
+        alert('Editing config for: ' + scraperName);
+      }
+
+      function controlScraper(scraperName, action) {
+        alert(action.charAt(0).toUpperCase() + action.slice(1) + 'ing scraper: ' + scraperName);
+      }
+
+      function runAnalysis(analysisType) {
+        alert('Running ' + analysisType + ' analysis...');
+      }
+
+      function mapIntent() {
+        const intent = document.getElementById('user-intent').value.trim();
+        if (!intent) {
+          alert('Please enter an intent.');
+          return;
+        }
+        // Simulate intent mapping
+        const intentResults = document.getElementById('intent-results');
+        intentResults.innerHTML = '<p><strong>Intent:</strong> ' + intent + '</p>' +
+                                  '<p><strong>Mapped Project:</strong> Analysis Module</p>' +
+                                  '<p><strong>Suggested Actions:</strong></p>' +
+                                  '<ul><li>Run sentiment analysis</li><li>Generate market report</li></ul>';
+      }
+
+      function executeCommand() {
+        const consoleInput = document.getElementById('console-input');
+        const command = consoleInput.value.trim();
+        if (!command) return;
+        const consoleOutput = document.getElementById('console');
+        consoleOutput.innerHTML += '<div>$ ' + command + '</div><div>Command executed successfully.</div>';
+        consoleInput.value = '';
+        consoleOutput.scrollTop = consoleOutput.scrollHeight;
+      }</script></body></html>

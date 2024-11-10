@@ -11,150 +11,132 @@ import (
     "path/filepath"
     "sort"
     "strings"
+    "html/template"
+
     "time"
 )
+func LLManalysisHandler(w http.ResponseWriter, r *http.Request) {
+    ollamaPrompt := "Generate a brief analysis of the current state of services and active scrapers."
+    ollamaResponse, err := CallOllamaLLM(ollamaPrompt)
+    if err != nil {
+        log.Println("Error calling Ollama LLM:", err)
+        http.Error(w, "Error generating LLM response", http.StatusInternalServerError)
+        return
+    }
 
-// HomeHandler handles the root path and provides an operational dashboard
+    response := map[string]string{"analysis": ollamaResponse}
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(response)
+}
+
+// // HomeHandler handles the root path and provides an operational dashboard
+// func HomeHandler(w http.ResponseWriter, r *http.Request) {
+//     tmplPath := filepath.Join("templates", "dashboard.html")
+//     tmpl, err := template.ParseFiles(tmplPath)
+//     if err != nil {
+//         http.Error(w, "Error loading template", http.StatusInternalServerError)
+//         log.Println("Error parsing template:", err)
+//         return
+//     }
+
+//     systemInfo := LoadSystemInfo()
+//     projects, err := GetRecentlyModifiedProjects()
+//     if err != nil {
+//         http.Error(w, "Error retrieving projects", http.StatusInternalServerError)
+//         log.Println("Error retrieving projects:", err)
+//         return
+//     }
+//     services := GetServiceStatus()
+//     scrapers := GetScraperStatus()
+
+//     ollamaPrompt := "Generate a brief analysis of the current state of services and active scrapers."
+//     ollamaResponse, err := CallOllamaLLM(ollamaPrompt)
+//     if err != nil {
+//         log.Println("Error calling Ollama LLM:", err)
+//         ollamaResponse = "Error generating response from Ollama LLM."
+//     }
+
+//     intents := []IntentMapping{
+//         {
+//             Intent:         "Scrape Financial News",
+//             MatchedProject: "news_scraper",
+//             Params:         "news_params.json",
+//         },
+//         {
+//             Intent:         "Perform Sentiment Analysis",
+//             MatchedProject: "sentiment_analyzer",
+//             Params:         "sentiment_params.json",
+//         },
+//     }
+
+//     data := struct {
+//         SystemInfo     SystemInfo
+//         Services       []ServiceStatus
+//         Projects       []Repo
+//         Scrapers       []Scraper
+//         Intents        []IntentMapping
+//         OllamaResponse string
+//     }{
+//         SystemInfo:     systemInfo,
+//         Services:       services,
+//         Projects:       projects,
+//         Scrapers:       scrapers,
+//         Intents:        intents,
+//         OllamaResponse: ollamaResponse,
+//     }
+
+//     err = tmpl.Execute(w, data)
+//     if err != nil {
+//         http.Error(w, "Error rendering template", http.StatusInternalServerError)
+//         log.Println("Error executing template:", err)
+//         return
+//     }
+// }
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "text/html")
+    tmplPath := filepath.Join("templates", "dashboard.html")
+    tmpl, err := template.ParseFiles(tmplPath)
+    if err != nil {
+        http.Error(w, "Error loading template", http.StatusInternalServerError)
+        log.Println("Error parsing template:", err)
+        return
+    }
 
     systemInfo := LoadSystemInfo()
     projects, err := GetRecentlyModifiedProjects()
     if err != nil {
-        http.Error(w, fmt.Sprintf("Error retrieving projects: %v", err), http.StatusInternalServerError)
+        http.Error(w, "Error retrieving projects", http.StatusInternalServerError)
+        log.Println("Error retrieving projects:", err)
         return
     }
     services := GetServiceStatus()
     scrapers := GetScraperStatus()
 
-    htmlOutput := `
-    <html>
-    <head>
-        <title>Operational Dashboard</title>
-        <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
-            .section { margin-bottom: 20px; }
-            .highlight { background-color: #d4edda; padding: 5px; border-radius: 3px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-        </style>
-    </head>
-    <body>
-        <h1>Operational Dashboard</h1>
-        <div class="section">
-            <h2>System Overview</h2>
-            <p><strong>Hostname:</strong> %s</p>
-            <p><strong>OS:</strong> %s</p>
-            <p><strong>Uptime:</strong> %s</p>
-            <p><strong>Kernel:</strong> %s</p>
-            <p><strong>Architecture:</strong> %s</p>
-        </div>
-        <div class="section">
-            <h2>Active Services</h2>
-            <table>
-                <thead>
-                    <tr><th>Service</th><th>Port</th><th>Status</th><th>Actions</th></tr>
-                </thead>
-                <tbody>
-    `
-
-    // Populate services section
-    for _, service := range services {
-        statusClass := ""
-        if service.Status == "Running" {
-            statusClass = "highlight"
-        }
-        htmlOutput += fmt.Sprintf(
-            `<tr>
-                <td>%s</td>
-                <td>%d</td>
-                <td class="%s">%s</td>
-                <td><a href="/view-logs?service=%s">View Logs</a></td>
-             </tr>`,
-            service.Name, service.Port, statusClass, service.Status, service.Name,
-        )
+    ollamaPrompt := "Generate a brief analysis of the current state of services and active scrapers."
+    ollamaResponse, err := CallOllamaLLM(ollamaPrompt)
+    if err != nil {
+        log.Println("Error calling Ollama LLM:", err)
+        ollamaResponse = "Error generating response from Ollama LLM."
     }
 
-    htmlOutput += `
-                </tbody>
-            </table>
-        </div>
-        <div class="section">
-            <h2>Recently Worked On Projects</h2>
-            <table>
-                <thead>
-                    <tr><th>Project</th><th>Last Modified</th><th>Actions</th></tr>
-                </thead>
-                <tbody>
-    `
-
-    // Populate recent projects section
-    for _, project := range projects {
-        htmlOutput += fmt.Sprintf(
-            `<tr>
-                <td>%s</td>
-                <td>%s</td>
-                <td><a href="/repo-details?project=%s">Details</a></td>
-             </tr>`,
-            project.Name, project.LastModified, project.Name,
-        )
+    data := struct {
+        SystemInfo     SystemInfo
+        Services       []ServiceStatus
+        Projects       []Repo
+        Scrapers       []Scraper
+        OllamaResponse string
+    }{
+        SystemInfo:     systemInfo,
+        Services:       services,
+        Projects:       projects,
+        Scrapers:       scrapers,
+        OllamaResponse: ollamaResponse,
     }
 
-    htmlOutput += `
-                </tbody>
-            </table>
-        </div>
-        <div class="section">
-            <h2>Scraper Management</h2>
-            <table>
-                <thead>
-                    <tr><th>Scraper</th><th>Status</th><th>Actions</th></tr>
-                </thead>
-                <tbody>
-    `
-
-    // Populate scraper section
-    for _, scraper := range scrapers {
-        action := "Edit Config"
-        htmlOutput += fmt.Sprintf(
-            `<tr>
-                <td>%s</td>
-                <td>%s</td>
-                <td>
-                    <a href="/edit-config?scraper=%s">%s</a> |
-                    <a href="/view-logs?scraper=%s">View Logs</a>
-                </td>
-             </tr>`,
-            scraper.Name, scraper.Status, scraper.Name, action, scraper.Name,
-        )
+    err = tmpl.Execute(w, data)
+    if err != nil {
+        log.Println("Error executing template:", err)
+        http.Error(w, "Error rendering template", http.StatusInternalServerError)
     }
-
-    htmlOutput += `
-                </tbody>
-            </table>
-        </div>
-        <div class="section">
-            <h2>Embeddings and Intent Mapping</h2>
-            <p>Explore intents and the projects/tasks that fulfill them:</p>
-            <ul>
-                <li><strong>Intent:</strong> Scrape Financial News<br>
-                    <strong>Matched Project:</strong> news_scraper<br>
-                    <strong>Params:</strong> news_params.json</li>
-                <li><strong>Intent:</strong> Perform Sentiment Analysis<br>
-                    <strong>Matched Project:</strong> sentiment_analyzer<br>
-                    <strong>Params:</strong> sentiment_params.json</li>
-            </ul>
-        </div>
-    </body>
-    </html>
-    `
-
-    // Fill in system information
-    fmt.Fprintf(w, htmlOutput,
-        systemInfo.Hostname, systemInfo.OS, systemInfo.Uptime,
-        systemInfo.Kernel, systemInfo.Architecture,
-    )
 }
 
 // LoadSystemInfo gathers basic system information
@@ -174,53 +156,164 @@ func LoadSystemInfo() SystemInfo {
     }
 }
 
-// GetRecentlyModifiedProjects scans directories and lists recently modified projects
+// func GetRecentlyModifiedProjects() ([]Repo, error) {
+//     var repos []Repo
+
+//     // Use environment variable or default paths
+//     basePaths := []string{}
+
+//     // Check if an environment variable is set for project paths
+//     if pathsEnv := os.Getenv("PROJECT_PATHS"); pathsEnv != "" {
+//         basePaths = strings.Split(pathsEnv, ":")
+//     } else {
+//         // Default paths
+//         homeDir, err := os.UserHomeDir()
+//         if err != nil {
+//             return nil, fmt.Errorf("unable to get user home directory: %w", err)
+//         }
+//         basePaths = []string{
+//             filepath.Join(homeDir, "Projects"),
+//             filepath.Join(homeDir, "ClojureProjects"),
+//             filepath.Join(homeDir, "tinystatus"),
+//         }
+//     }
+
+//     seen := make(map[string]bool)
+
+//     for _, basePath := range basePaths {
+//         entries, err := ioutil.ReadDir(basePath)
+//         if err != nil {
+//             log.Printf("Error reading directory %s: %v", basePath, err)
+//             continue
+//         }
+
+//         for _, entry := range entries {
+//             // Skip if not a directory, already seen, or starts with a dot
+//             if !entry.IsDir() || strings.HasPrefix(entry.Name(), ".") || seen[entry.Name()] {
+//                 continue
+//             }
+
+//             repoPath := filepath.Join(basePath, entry.Name())
+
+//             // Ensure we have permission to access the directory
+//             if _, err := os.Stat(repoPath); err != nil {
+//                 log.Printf("Cannot access directory %s: %v", repoPath, err)
+//                 continue
+//             }
+
+//             repos = append(repos, Repo{
+//                 Name:         entry.Name(),
+//                 Path:         repoPath,
+//                 LastModified: entry.ModTime(),
+//             })
+//             seen[entry.Name()] = true
+//         }
+//     }
+
+//     // Sort repos by last modified date in descending order
+//     sort.Slice(repos, func(i, j int) bool {
+//         return repos[i].LastModified.After(repos[j].LastModified)
+//     })
+
+//     // Limit the number of projects displayed (e.g., top 10)
+//     if len(repos) > 10 {
+//         repos = repos[:10]
+//     }
+
+//     return repos, nil
+// }
 func GetRecentlyModifiedProjects() ([]Repo, error) {
-    basePaths := []string{"/home/uprootiny/ClojureProjects", "/home/uprootiny/Projects", "/home/uprootiny/tinystatus"}
     var repos []Repo
 
+    // Determine the base paths for scanning
+    basePaths := []string{}
+    if pathsEnv := os.Getenv("PROJECT_PATHS"); pathsEnv != "" {
+        basePaths = strings.Split(pathsEnv, ":")
+    } else {
+        homeDir, err := os.UserHomeDir()
+        if err != nil {
+            return nil, fmt.Errorf("unable to get user home directory: %w", err)
+        }
+        basePaths = []string{
+            filepath.Join(homeDir, "Projects"),
+            filepath.Join(homeDir, "ClojureProjects"),
+            filepath.Join(homeDir, "tinystatus"),
+            filepath.Join(homeDir, "NovProjects"), // Additional paths if needed
+        }
+    }
+
+    seen := make(map[string]bool)
+
     for _, basePath := range basePaths {
-        err := filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
-            if err != nil {
-                log.Printf("Error accessing path %s: %v", path, err)
-                return nil
+        entries, err := ioutil.ReadDir(basePath)
+        if err != nil {
+            log.Printf("Error reading directory %s: %v", basePath, err)
+            continue
+        }
+
+        for _, entry := range entries {
+            if !entry.IsDir() || strings.HasPrefix(entry.Name(), ".") || seen[entry.Name()] {
+                continue
             }
 
-            if info.IsDir() && !strings.HasPrefix(info.Name(), ".") {
-                repos = append(repos, Repo{
-                    Name:         info.Name(),
-                    Path:         path,
-                    LastModified: info.ModTime().Format("2006-01-02 15:04:05"),
-                })
+            repoPath := filepath.Join(basePath, entry.Name())
+
+            if _, err := os.Stat(repoPath); err != nil {
+                log.Printf("Cannot access directory %s: %v", repoPath, err)
+                continue
             }
-            return nil
-        })
-        if err != nil {
-            return nil, err
+
+            repos = append(repos, Repo{
+                Name:         entry.Name(),
+                Path:         repoPath,
+                LastModified: entry.ModTime(), // Use time.Time directly
+            })
+            seen[entry.Name()] = true
         }
     }
 
     // Sort repos by last modified date in descending order
     sort.Slice(repos, func(i, j int) bool {
-        timeI, _ := time.Parse("2006-01-02 15:04:05", repos[i].LastModified)
-        timeJ, _ := time.Parse("2006-01-02 15:04:05", repos[j].LastModified)
-        return timeI.After(timeJ)
+        return repos[i].LastModified.After(repos[j].LastModified)
     })
+
+    if len(repos) > 10 {
+        repos = repos[:10]
+    }
 
     return repos, nil
 }
 
-// GetServiceStatus checks the status of active services
 func GetServiceStatus() []ServiceStatus {
     services := []ServiceStatus{
         {"Ollama Server", 11435, "Not Running", "ollama-log.txt"},
         {"Electric App", 8085, "Running", "electric-log.txt"},
         {"Tinystatus", 4090, "Running", "tinystatus-log.txt"},
+        {"News Scraper", 5000, "Running", "news-scraper-log.txt"},
+        {"Stock Scraper", 5001, "Idle", "stock-scraper-log.txt"},
+        {"Event Correlation Scraper", 5002, "Not Running", "event-correlation-log.txt"},
+        {"Market Data Aggregator", 6000, "Running", "market-data-log.txt"},
+        {"Sentiment Analysis Dashboard", 7000, "Running", "sentiment-dashboard-log.txt"},
+        {"WebSocket Server", 9000, "Not Running", "websocket-log.txt"},
+        {"Analytics Engine", 9100, "Running", "analytics-engine-log.txt"},
     }
 
-    // Implement actual service status checks if necessary
+    // Implement actual checks or integration with service discovery mechanisms if needed
+
     return services
 }
+
+// // GetServiceStatus checks the status of active services
+// func GetServiceStatus() []ServiceStatus {
+//     services := []ServiceStatus{
+//         {"Ollama Server", 11435, "Not Running", "ollama-log.txt"},
+//         {"Electric App", 8085, "Running", "electric-log.txt"},
+//         {"Tinystatus", 4090, "Running", "tinystatus-log.txt"},
+//     }
+
+//     // Implement actual service status checks if necessary
+//     return services
+// }
 
 // GetScraperStatus retrieves the status of active scrapers
 func GetScraperStatus() []Scraper {
@@ -306,15 +399,16 @@ func ListWorkingDirs(basePaths []string) ([]Repo, error) {
             }
 
             if info.IsDir() && !strings.HasPrefix(info.Name(), ".") {
-                entryPoints := findEntryPoints(path)
-                intents := inferIntents(path)
+                // Placeholder functions for finding entry points and inferring intents.
+                entryPoints := findEntryPoints(path) // Implement this function as needed.
+                intents := inferIntents(path)        // Implement this function as needed.
 
                 repos = append(repos, Repo{
                     Name:         info.Name(),
                     Path:         path,
                     EntryPoints:  entryPoints,
                     Intents:      intents,
-                    LastModified: info.ModTime().Format("2006-01-02 15:04:05"),
+                    LastModified: info.ModTime(), // Use time.Time for LastModified.
                 })
             }
             return nil
@@ -326,6 +420,7 @@ func ListWorkingDirs(basePaths []string) ([]Repo, error) {
 
     return repos, nil
 }
+
 
 // GetRepoDetails retrieves detailed information about a specific repository
 func GetRepoDetails(basePath, repoName string) (map[string]string, error) {

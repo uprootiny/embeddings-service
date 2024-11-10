@@ -1,107 +1,145 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <link rel="stylesheet" href="/templates/styles.css">
+
     <title>Operational Dashboard</title>
     <style>
-        /* Include your styles here */
+    /* Existing styles */
+    /* ... */
+    /* Add hover effects for table rows */
+    table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+    /* Style the status indicators */
+    .status-running {
+        background-color: #d4edda;
+        color: #155724;
+        font-weight: bold;
+    }
+    .status-stopped {
+        background-color: #f8d7da;
+        color: #721c24;
+        font-weight: bold;
+    }
+
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
+        .section { margin-bottom: 20px; }
+        .highlight { background-color: #d4edda; padding: 5px; border-radius: 3px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .status-running { background-color: #d4edda; }
+        .status-stopped { background-color: #f8d7da; }
     </style>
 </head>
 <body>
-    <!-- System Information Section -->
-    <h2>System Overview</h2>
-    <p><strong>Hostname:</strong> {{.SystemInfo.Hostname}}</p>
-    <p><strong>OS:</strong> {{.SystemInfo.OS}}</p>
-    <p><strong>Uptime:</strong> {{.SystemInfo.Uptime}}</p>
-    <p><strong>Kernel:</strong> {{.SystemInfo.Kernel}}</p>
-    <p><strong>Architecture:</strong> {{.SystemInfo.Architecture}}</p>
+    <h1>Operational Dashboard</h1>
+
+    <!-- System Overview Section -->
+    <div class="section">
+        <h2>System Overview</h2>
+        <p><strong>Hostname:</strong> {{.SystemInfo.Hostname}}</p>
+        <p><strong>OS:</strong> {{.SystemInfo.OS}}</p>
+        <p><strong>Uptime:</strong> {{.SystemInfo.Uptime}}</p>
+        <p><strong>Kernel:</strong> {{.SystemInfo.Kernel}}</p>
+        <p><strong>Architecture:</strong> {{.SystemInfo.Architecture}}</p>
+    </div>
 
     <!-- Active Services Section -->
-    <h2>Active Services</h2>
-    <ul>
-        {{range .Services}}
-        <li>
-            <strong>{{.Name}} (port {{.Port}}):</strong>
-            {{if eq .Status "Running"}}
-                <span style="color: green;">Running</span>
-            {{else}}
-                <span style="color: red;">Not Running</span>
-            {{end}}
-            <a href="/logs/{{.LogFile}}">View Logs</a>
-        </li>
-        {{end}}
-    </ul>
+    <div class="section">
+        <h2>Active Services</h2>
+        <table>
+            <thead>
+                <tr><th>Service</th><th>Port</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {{range .Services}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>{{.Port}}</td>
+                    <td class="{{if eq .Status "Running"}}status-running{{else}}status-stopped{{end}}">{{.Status}}</td>
+                    <td>{{if .URL}}<a href="{{.URL}}" target="_blank">Access</a>{{else}}N/A{{end}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- LLM Analysis Section -->
+    <div class="section">
+        <h2>LLM Analysis</h2>
+        <div id="llm-analysis" class="loading">Loading analysis...</div>
+    </div>
 
     <!-- Recently Worked On Projects Section -->
-    <h2>Recently Worked On Projects</h2>
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Project</th>
-                <th>Last Modified</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{range .Projects}}
-            <tr>
-                <td>{{.Name}}</td>
-                <td>{{.LastModified}}</td>
-                <td><a href="/projects/{{.Name}}">Details</a></td>
-            </tr>
-            {{end}}
-        </tbody>
-    </table>
+    <div class="section">
+        <h2>Recently Worked On Projects</h2>
+        <table>
+            <thead>
+                <tr><th>Project</th><th>Last Modified</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {{range .Projects}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>{{.LastModified.Format "2006-01-02 15:04:05"}}</td>
+                    <td><a href="/repo-details?project={{.Name}}">Details</a></td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
 
     <!-- Scraper Management Section -->
-    <h2>Scraper Management</h2>
-    <p>Overview of scrapers and their current status:</p>
-    <ul>
-        {{range .Scrapers}}
-        <li>
-            <strong>{{.Name}}:</strong>
-            {{if eq .Status "Running"}}
-                <span style="color: green;">Running</span>
-            {{else if eq .Status "Idle"}}
-                <span style="color: orange;">Idle</span>
-            {{else}}
-                <span style="color: red;">Not Running</span>
-            {{end}}
-            <a href="{{.ConfigURL}}">Edit Config</a>
-            {{if .LogFile}}
-                | <a href="/logs/{{.LogFile}}">View Logs</a>
-            {{end}}
-        </li>
-        {{end}}
-    </ul>
+    <div class="section">
+        <h2>Scraper Management</h2>
+        <table>
+            <thead>
+                <tr><th>Scraper</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {{range .Scrapers}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>{{.Status}}</td>
+                    <td>
+                        <a href="/edit-config?scraper={{.Name}}">Edit Config</a> |
+                        <a href="/view-logs?scraper={{.Name}}">View Logs</a>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
 
     <!-- Embeddings and Intent Mapping Section -->
-    <h2>Embeddings and Intent Mapping</h2>
-    <p>Explore intents and the projects/tasks that fulfill them:</p>
-    <ul>
-        {{range .Embeddings}}
-        <li>
-            <strong>Intent:</strong> {{.Intent}}
-            <ul>
-                <li><strong>Matched Project:</strong> <a href="/projects/{{.MatchedProject}}">{{.MatchedProject}}</a></li>
-                <li><strong>Params:</strong> <a href="/params/{{.Params}}">{{.Params}}</a></li>
-            </ul>
-        </li>
-        {{end}}
-    </ul>
+    <div class="section">
+        <h2>Embeddings and Intent Mapping</h2>
+        <ul>
+            {{range .Intents}}
+            <li>
+                <strong>Intent:</strong> {{.Intent}}<br>
+                <strong>Matched Project:</strong> {{.MatchedProject}}<br>
+                <strong>Params:</strong> {{.Params}}
+            </li>
+            {{end}}
+        </ul>
+    </div>
 
-    <!-- Recommended Actions Section -->
-    <h2>Recommended Actions</h2>
-    <ul>
-        <li>Review <a href="/logs/errors.log">error logs</a> for failed services.</li>
-        <li>Start <strong>Ollama Server</strong> on port 11435: 
-            <code>./ollama --start</code>
-        </li>
-        <li>Ensure <strong>Electric App</strong> dependencies are up to date: 
-            <code>clojure -T:deps refresh</code>
-        </li>
-        <li>Schedule <strong>Daily News Scraper Run</strong>: 
-            <code>./scheduler --task news_scraper --daily</code>
-        </li>
-    </ul>
+    <!-- Script for asynchronous LLM analysis -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/llm-analysis')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('llm-analysis').innerText = data.analysis || 'No analysis available.';
+                })
+                .catch(error => {
+                    console.error('Error fetching LLM analysis:', error);
+                    document.getElementById('llm-analysis').innerHTML = '<p class="status-stopped">Error loading LLM Analysis.</p>';
+                });
+        });
+    </script>
 </body>
 </html>

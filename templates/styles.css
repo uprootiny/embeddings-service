@@ -1,0 +1,188 @@
+/* Base Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 10px 0;
+    font-weight: 600;
+}
+
+/* Layout & Containers */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Sections */
+.section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background: linear-gradient(145deg, #fdfdfd, #ebebeb);
+    border-radius: 10px;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.05), -4px -4px 10px rgba(255, 255, 255, 1);
+}
+
+.section-header {
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background: linear-gradient(180deg, #f7f7f7, #eaeaea);
+    font-weight: 700;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+.status-running {
+    background-color: #e6ffe6;
+    color: #2a7a2a;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+.status-stopped {
+    background-color: #ffe6e6;
+    color: #a32d2d;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+.status-idle {
+    background-color: #fff8cc;
+    color: #a67f00;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+/* Buttons */
+button, .btn {
+    padding: 10px 20px;
+    margin: 5px 0;
+    background-color: #007BFF;
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+button:hover, .btn:hover {
+    background-color: #0056b3;
+    box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+button:active, .btn:active {
+    background-color: #004080;
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Links */
+a {
+    color: #007BFF;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+/* Panels and Cards */
+.card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.card-content {
+    font-size: 0.95em;
+    color: #555;
+}
+
+/* Embellishments */
+.shadow {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.gradient-text {
+    background: linear-gradient(90deg, #007BFF, #00C6FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.neumorphic {
+    background: #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 7px 7px 14px #bebebe, -7px -7px 14px #ffffff;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 1.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.glow {
+    animation: glow 1.5s ease-in-out infinite alternate;
+    box-shadow: 0 0 10px #007BFF, 0 0 20px #007BFF, 0 0 30px #0056b3;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 10px #007BFF;
+    }
+    to {
+        box-shadow: 0 0 20px #007BFF, 0 0 30px #0056b3;
+    }
+}

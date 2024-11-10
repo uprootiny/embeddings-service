@@ -4,26 +4,19 @@ import (
     "encoding/json"
     "fmt"
     "io/ioutil"
-    "log"
     "math"
-    "os"
     "strings"
     "unicode"
+    "log"
+    "os"
 )
 
-// Embedding structure for intents and projects
-type Embedding struct {
-    Intent   string    `json:"intent"`
-    Project  string    `json:"project"`
-    Params   string    `json:"params"`
-    Vector   []float64 `json:"vector"` // Add a vector field for similarity matching
-}
 
-// Word embeddings map loaded from an external file
+// Global variables for word embeddings
 var wordEmbeddings = make(map[string][]float64)
-var embeddingDimension = 4 // Change this based on your embedding file's dimension
+var embeddingDimension = 4 // Default dimension; adjust based on your data
 
-// Load word embeddings from a file
+// LoadWordEmbeddings loads word embeddings from a JSON file
 func LoadWordEmbeddings(filePath string) error {
     file, err := os.Open(filePath)
     if err != nil {
@@ -45,7 +38,7 @@ func LoadWordEmbeddings(filePath string) error {
     return nil
 }
 
-// Load embeddings from a file
+// LoadEmbeddings loads intent embeddings from a JSON file
 func LoadEmbeddings(filePath string) ([]Embedding, error) {
     data, err := ioutil.ReadFile(filePath)
     if err != nil {
@@ -152,25 +145,6 @@ func MapIntentToProject(intent string, embeddings []Embedding) (Embedding, float
         }
     }
 
+    log.Printf("Best match for intent '%s': Project: %s, Similarity: %f", intent, bestMatch.Project, highestSimilarity)
     return bestMatch, highestSimilarity
-}
-
-func main() {
-    // Load word embeddings from an external file
-    if err := LoadWordEmbeddings("data/word_embeddings.json"); err != nil {
-        log.Fatalf("Error loading word embeddings: %v", err)
-    }
-
-    // Load intent embeddings
-    embeddings, err := LoadEmbeddings("data/embeddings.json")
-    if err != nil {
-        log.Fatalf("Error loading intent embeddings: %v", err)
-    }
-
-    // Test mapping an intent to a project
-    intent := "Analyze market trends and news"
-    bestMatch, similarity := MapIntentToProject(intent, embeddings)
-
-    log.Printf("Best match for intent '%s': Project: %s, Params: %s, Similarity: %f",
-        intent, bestMatch.Project, bestMatch.Params, similarity)
 }

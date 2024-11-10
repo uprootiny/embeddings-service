@@ -15,6 +15,7 @@ func main() {
     router.HandleFunc("/list-repos", ListReposHandler).Methods("GET")
     router.HandleFunc("/map-intent", MapIntentHandler).Methods("GET")
     router.HandleFunc("/repo-details", RepoDetailsHandler).Methods("GET")
+    router.HandleFunc("/api/llm-analysis", LLManalysisHandler)
 
     // Start the server
     log.Println("Server running on port 8085")
